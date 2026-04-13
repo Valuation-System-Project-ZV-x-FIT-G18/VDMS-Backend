@@ -3,6 +3,16 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { Project } from './entities/project.entity';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { Document } from './entities/document.entity';
+import { TeamMember } from './entities/team-member.entity';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { TeamMembersModule } from './modules/team-members/team-members.module';
+import { Invoice } from './entities/invoice.entity';
+import { InvoicesModule } from './modules/invoices/invoices.module';
+import { Notification } from './entities/notification.entity';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -16,10 +26,15 @@ import { AppService } from './app.service';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [],
+      entities: [Project, Document, TeamMember, Invoice, Notification],
       synchronize: true,
       logging: true,
     }),
+    ProjectsModule,
+    DocumentsModule,
+    TeamMembersModule,
+    InvoicesModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
