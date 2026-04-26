@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+﻿import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
@@ -29,6 +29,12 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  const port = parseInt(process.env.PORT ?? '3000', 10);
+  const frontendOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   app.enableCors({
     origin: (origin, callback) => {

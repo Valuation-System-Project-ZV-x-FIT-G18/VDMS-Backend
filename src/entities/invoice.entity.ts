@@ -42,10 +42,18 @@ export class Invoice {
   @Column({ name: 'payment_proof_file_name', type: 'varchar', nullable: true })
   paymentProofFileName!: string | null;
 
-  @Column({ name: 'payment_proof_uploaded_at', type: 'timestamp', nullable: true })
+  @Column({
+    name: 'payment_proof_uploaded_at',
+    type: 'timestamp',
+    nullable: true,
+  })
   paymentProofUploadedAt!: Date | null;
 
-  @Column({ name: 'coordinator_notified_at', type: 'timestamp', nullable: true })
+  @Column({
+    name: 'coordinator_notified_at',
+    type: 'timestamp',
+    nullable: true,
+  })
   coordinatorNotifiedAt!: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
