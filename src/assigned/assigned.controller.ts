@@ -1,5 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AssignedService } from './assigned.service';
+import { ProjectIdQueryDto } from '../validation';
 
 @Controller('assigned')
 export class AssignedController {
@@ -11,7 +12,7 @@ export class AssignedController {
   }
 
   @Get('project')
-  async getByProject(@Query('projectId') projectId: string) {
-    return await this.service.findByProject(projectId);
+  async getByProject(@Query() query: ProjectIdQueryDto) {
+    return await this.service.findByProject(query.projectId);
   }
 }

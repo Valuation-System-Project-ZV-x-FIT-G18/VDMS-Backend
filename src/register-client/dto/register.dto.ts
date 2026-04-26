@@ -1,20 +1,34 @@
-import { IsString, IsEmail, MinLength, IsOptional, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsValidBirthDay,
+  IsValidCity,
+  IsValidConfirmPassword,
+  IsValidContactNumber,
+  IsValidDistrict,
+  IsValidEmailField,
+  IsValidFullName,
+  IsValidNic,
+  IsValidPassword,
+  IsValidPostalCode,
+  IsValidProvince,
+  IsValidStreetAddress,
+} from '../../validation';
 
 /* Validates the incoming registration request body */
 export class RegisterDto {
-  @IsString() @IsNotEmpty() fullName: string;
+  @IsValidFullName() fullName: string;
   @IsString() @IsNotEmpty() firstName: string;
   @IsString() @IsNotEmpty() lastName: string;
   @IsString() @IsNotEmpty() nameWithInitials: string;
-  @IsString() @IsNotEmpty() nic: string;
-  @IsOptional() @IsString() dateOfBirth?: string;
-  @IsString() @IsNotEmpty() phone: string;
-  @IsEmail() email: string;
-  @MinLength(6) password: string;         // coordinator-set temp password — min 6 chars
-  @MinLength(6) confirmPassword: string;
-  @IsString() @IsNotEmpty() streetAddress: string;
-  @IsString() @IsNotEmpty() city: string;
-  @IsString() @IsNotEmpty() district: string;
-  @IsString() @IsNotEmpty() province: string;
-  @IsOptional() @IsString() postalCode?: string;
+  @IsValidNic() nic: string;
+  @IsValidBirthDay() dateOfBirth: string;
+  @IsValidContactNumber() phone: string;
+  @IsValidEmailField() email: string;
+  @IsValidPassword() password: string;
+  @IsValidConfirmPassword() confirmPassword: string;
+  @IsValidStreetAddress() streetAddress: string;
+  @IsValidCity() city: string;
+  @IsValidDistrict() district: string;
+  @IsValidProvince() province: string;
+  @IsValidPostalCode() postalCode: string;
 }

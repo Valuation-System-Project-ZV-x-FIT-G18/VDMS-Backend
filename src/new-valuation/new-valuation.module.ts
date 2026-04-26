@@ -8,6 +8,7 @@ import { LoanApplicant } from '../entities/loan-applicant.entity';
 import { Project } from '../entities/project.entity';
 import { ProjectLoanApplicant } from '../entities/project-loan-applicant.entity';
 import { ProjectValuation } from '../entities/project-valuation.entity';
+import { Property } from '../entities/property.entity';
 import { NewValuationController } from './new-valuation.controller';
 import { NewValuationService } from './new-valuation.service';
 
@@ -22,6 +23,7 @@ import { NewValuationService } from './new-valuation.service';
       Project,
       ProjectLoanApplicant,
       ProjectValuation,
+      Property,
     ]),
   ],
   controllers: [NewValuationController],
