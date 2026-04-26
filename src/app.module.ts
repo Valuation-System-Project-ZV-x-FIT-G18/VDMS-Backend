@@ -13,6 +13,9 @@ import { Invoice } from './entities/invoice.entity';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { Notification } from './entities/notification.entity';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ChatConversation } from './entities/chat-conversation.entity';
+import { ChatMessage } from './entities/chat-message.entity';
+import { MessagesModule } from './modules/messages/messages.module';
 
 @Module({
   imports: [
@@ -21,12 +24,13 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
+      url: process.env.DATABASE_URL,
       host: process.env.DATABASE_HOST,
       port: parseInt(process.env.DATABASE_PORT ?? '5432', 10),
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [Project, Document, TeamMember, Invoice, Notification],
+      entities: [Project, Document, TeamMember, Invoice, Notification, ChatConversation, ChatMessage],
       synchronize: true,
       logging: true,
     }),
@@ -35,6 +39,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     TeamMembersModule,
     InvoicesModule,
     NotificationsModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
