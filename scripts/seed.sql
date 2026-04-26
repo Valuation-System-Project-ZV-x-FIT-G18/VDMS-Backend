@@ -4,6 +4,35 @@
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+DO $$
+BEGIN
+  CREATE TYPE account_settings_role_enum AS ENUM ('bank_credit_officer', 'property_owner');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS account_settings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  role account_settings_role_enum NOT NULL,
+  account_id varchar NOT NULL,
+  bank_name varchar NULL,
+  branch varchar NULL,
+  contact_person_name varchar NULL,
+  full_name varchar NULL,
+  national_id varchar NULL,
+  residential_address varchar NULL,
+  email varchar NOT NULL,
+  phone varchar NULL,
+  email_notifications boolean NOT NULL DEFAULT true,
+  sms_alerts boolean NOT NULL DEFAULT false,
+  last_password_change_at timestamptz NULL,
+  last_login_at timestamptz NULL,
+  last_login_ip varchar NULL,
+  created_at timestamptz NOT NULL DEFAULT NOW(),
+  updated_at timestamptz NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_account_settings_role_account UNIQUE (role, account_id)
+);
+
 BEGIN;
 
 -- Cleanup in dependency order
@@ -78,15 +107,15 @@ INSERT INTO projects (
   updated_at
 )
 VALUES
-  (gen_random_uuid(), 'PROJ-2023-001', '123 Galle Rd, Colombo 03', 'John Doe', 'Site Inspected', '2023-10-24', '2023-10-28', 'Pending', 'client-001', NOW(), NOW()),
-  (gen_random_uuid(), 'PROJ-2023-002', '45 Kandy Rd, Kelaniya', 'Jane Smith', 'Awaiting Docs', '2023-10-23', '2023-10-29', 'Paid', 'client-001', NOW(), NOW()),
-  (gen_random_uuid(), 'PROJ-2023-003', '89 Duplication Rd, Col 03', 'Bob Wilson', 'Completed', '2023-10-20', '2023-10-24', 'Paid', 'client-001', NOW(), NOW()),
-  (gen_random_uuid(), 'PROJ-2023-004', '12 Marine Dr, Col 04', 'Alice Johnson', 'Payment Pending', '2023-10-19', '2023-10-24', 'Pending', 'client-001', NOW(), NOW()),
-  (gen_random_uuid(), 'PROJ-2023-005', '56 High Level Rd, Nugegoda', 'Charlie Brown', 'Report Prepared', '2023-10-22', '2023-10-27', 'Paid', 'client-001', NOW(), NOW()),
-  (gen_random_uuid(), 'PROJ-2023-006', '78 Temple Rd, Maharagama', NULL, 'In Progress', '2023-10-25', '2023-10-30', 'Pending', 'client-001', NOW(), NOW()),
-  (gen_random_uuid(), 'PROJ-2023-007', '34 Station Rd, Dehiwala', NULL, 'Completed', '2023-10-15', '2023-10-20', 'Paid', 'client-001', NOW(), NOW());
+  (gen_random_uuid(), 'VAL-2026-001', '123 Galle Rd, Colombo 03', 'John Doe', 'Site Inspected', '2023-10-24', '2023-10-28', 'Pending', 'client-001', NOW() - INTERVAL '6 days', NOW() - INTERVAL '6 days'),
+  (gen_random_uuid(), 'VAL-2026-002', '45 Kandy Rd, Kelaniya', 'John Doe', 'Awaiting Docs', '2023-10-23', '2023-10-29', 'Paid', 'client-001', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days'),
+  (gen_random_uuid(), 'VAL-2026-003', '89 Duplication Rd, Col 03', 'John Doe', 'Completed', '2023-10-20', '2023-10-24', 'Paid', 'client-001', NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days'),
+  (gen_random_uuid(), 'VAL-2026-004', '12 Marine Dr, Col 04', 'John Doe', 'Payment Pending', '2023-10-19', '2023-10-24', 'Pending', 'client-001', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days'),
+  (gen_random_uuid(), 'VAL-2026-005', '56 High Level Rd, Nugegoda', 'John Doe', 'Report Prepared', '2023-10-22', '2023-10-27', 'Paid', 'client-001', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
+  (gen_random_uuid(), 'VAL-2026-006', '78 Temple Rd, Maharagama', 'John Doe', 'In Progress', '2023-10-25', '2023-10-30', 'Pending', 'client-001', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),
+  (gen_random_uuid(), 'VAL-2026-007', '34 Station Rd, Dehiwala', 'John Doe', 'Completed', '2023-10-15', '2023-10-20', 'Paid', 'client-001', NOW(), NOW());
 
--- Documents for PROJ-2023-001
+-- Documents for VAL-2026-001
 INSERT INTO documents (id, name, status, uploaded_by, required, note, project_id, upload_date)
 VALUES
   (
@@ -240,8 +269,75 @@ VALUES
 
 COMMIT;
 
+-- Account settings
+DELETE FROM account_settings
+WHERE account_id IN ('client-001', 'owner-001');
+
+INSERT INTO account_settings (
+  id,
+  role,
+  account_id,
+  bank_name,
+  branch,
+  contact_person_name,
+  full_name,
+  national_id,
+  residential_address,
+  email,
+  phone,
+  email_notifications,
+  sms_alerts,
+  last_password_change_at,
+  last_login_at,
+  last_login_ip,
+  created_at,
+  updated_at
+)
+VALUES
+  (
+    gen_random_uuid(),
+    'bank_credit_officer',
+    'client-001',
+    'Commercial Bank PLC',
+    'Colombo 07 - Main Branch',
+    'David Perera',
+    NULL,
+    NULL,
+    NULL,
+    'david.perera@combank.lk',
+    '+94 77 123 4567',
+    true,
+    false,
+    '2026-01-26T00:00:00.000Z',
+    '2026-04-24T10:42:00.000Z',
+    '192.168.1.1',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '1 day'
+  ),
+  (
+    gen_random_uuid(),
+    'property_owner',
+    'owner-001',
+    NULL,
+    NULL,
+    NULL,
+    'David Silva',
+    '199012345678',
+    '89 Duplication Rd, Colombo 03',
+    'david.silva@gmail.com',
+    '+94 77 987 6543',
+    true,
+    false,
+    '2026-01-26T00:00:00.000Z',
+    '2026-04-24T10:42:00.000Z',
+    '192.168.1.1',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '1 day'
+  );
+
 -- Verification
 SELECT COUNT(*) AS project_count FROM projects;
 SELECT COUNT(*) AS document_count FROM documents;
 SELECT COUNT(*) AS team_member_count FROM team_members;
 SELECT COUNT(*) AS notification_count FROM notifications;
+SELECT COUNT(*) AS account_settings_count FROM account_settings;

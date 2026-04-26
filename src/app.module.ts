@@ -5,6 +5,20 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './entities/user.entity';
 import { Project } from './entities/project.entity';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { Document } from './entities/document.entity';
+import { TeamMember } from './entities/team-member.entity';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { TeamMembersModule } from './modules/team-members/team-members.module';
+import { Invoice } from './entities/invoice.entity';
+import { InvoicesModule } from './modules/invoices/invoices.module';
+import { Notification } from './entities/notification.entity';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ChatConversation } from './entities/chat-conversation.entity';
+import { ChatMessage } from './entities/chat-message.entity';
+import { MessagesModule } from './modules/messages/messages.module';
+import { AccountSetting } from './entities/account-setting.entity';
+import { AccountSettingsModule } from './modules/account-settings/account-settings.module';
 import { LoanApplicant } from './entities/loan-applicant.entity';
 import { ProjectLoanApplicant } from './entities/project-loan-applicant.entity';
 import { ProjectValuation } from './entities/project-valuation.entity';
@@ -48,6 +62,20 @@ import { ProjectSummaryModule } from './project-summary/project-summary.module';
       type: 'postgres',
       host: process.env.DATABASE_HOST ?? 'localhost',
       port: parseInt(process.env.DATABASE_PORT ?? '5432', 10),
+      username: process.env.DATABASE_USER,
+      password: process.env.DATABASE_PASSWORD,
+      database: process.env.DATABASE_NAME,
+      entities: [Project, Document, TeamMember, Invoice, Notification, ChatConversation, ChatMessage, AccountSetting],
+      synchronize: true,
+      logging: true,
+    }),
+    ProjectsModule,
+    DocumentsModule,
+    TeamMembersModule,
+    InvoicesModule,
+    NotificationsModule,
+    MessagesModule,
+    AccountSettingsModule,
       username: process.env.DATABASE_USER ?? 'postgres',
       password: process.env.DATABASE_PASSWORD ?? 'postgres',
       database: process.env.DATABASE_NAME ?? 'vdms_db',
