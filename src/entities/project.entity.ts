@@ -1,79 +1,18 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
-import { Document } from './document.entity';
-import { TeamMember } from './team-member.entity';
-import { Invoice } from './invoice.entity';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm'; // TypeORM decorators
+import { User } from './user.entity'; // FK to users table
 
-export enum ProjectStatus {
-  SITE_INSPECTED = 'Site Inspected',
-  AWAITING_DOCS = 'Awaiting Docs',
-  COMPLETED = 'Completed',
-  PAYMENT_PENDING = 'Payment Pending',
-  REPORT_PREPARED = 'Report Prepared',
-  IN_PROGRESS = 'In Progress',
-}
-
-export enum PaymentStatus {
-  PAID = 'Paid',
-  PENDING = 'Pending',
-}
-
-@Entity('projects')
+@Entity('projects') // maps to "projects" table
 export class Project {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  @PrimaryColumn({ length: 6 }) // e.g. pro001 — "pro" + 3-digit number
+  project_id: string;
 
-  @Column({ name: 'project_id', unique: true })
-  projectId!: string;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user!: User;
 
-  @Column({ name: 'property_address' })
-  propertyAddress!: string;
+  @Column({ default: 'pending' }) // current project status
+  status: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  applicant!: string | null;
-
-  @Column({
-    type: 'enum',
-    enum: ProjectStatus,
-    default: ProjectStatus.IN_PROGRESS,
-  })
-  status!: ProjectStatus;
-
-  @Column({ name: 'requested_date', type: 'date' })
-  requestedDate!: Date;
-
-  @Column({ name: 'expected_completion', type: 'date' })
-  expectedCompletion!: Date;
-
-  @Column({
-    type: 'enum',
-    enum: PaymentStatus,
-    default: PaymentStatus.PENDING,
-    name: 'payment_status',
-  })
-  paymentStatus!: PaymentStatus;
-
-  @Column({ name: 'client_id', type: 'varchar', nullable: true })
-  clientId!: string | null;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt!: Date;
-
-  @OneToMany(() => Document, (document) => document.project)
-  documents!: Document[];
-
-  @OneToMany(() => TeamMember, (teamMember) => teamMember.project)
-  teamMembers!: TeamMember[];
-
-  @OneToMany(() => Invoice, (invoice) => invoice.project)
-  invoices!: Invoice[];
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }) // when created
+  created_at: Date;
 }
