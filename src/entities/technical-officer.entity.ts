@@ -26,6 +26,9 @@ export class TechnicalOfficer {
   @Column({ unique: true }) // national identity card — unique
   nic: string;
 
+  @Column({ nullable: true }) // officer's current city
+  city?: string;
+
   @Column({ type: 'date' }) // date of birth stored as date type
   dob: string;
 }

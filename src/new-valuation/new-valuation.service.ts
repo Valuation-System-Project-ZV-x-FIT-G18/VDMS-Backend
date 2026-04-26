@@ -9,6 +9,7 @@ import { LoanApplicant } from '../entities/loan-applicant.entity';
 import { Project } from '../entities/project.entity';
 import { ProjectLoanApplicant } from '../entities/project-loan-applicant.entity';
 import { ProjectValuation } from '../entities/project-valuation.entity';
+import { Property } from '../entities/property.entity';
 import { UserRole } from '../enums/user-role.enum';
 import { NewValuationDto } from './dto/new-valuation.dto';
 
@@ -31,6 +32,8 @@ export class NewValuationService {
     private readonly projectLoanApplicantRepo: Repository<ProjectLoanApplicant>,
     @InjectRepository(ProjectValuation)
     private readonly linkRepo: Repository<ProjectValuation>,
+    @InjectRepository(Property)
+    private readonly propertyRepo: Repository<Property>,
   ) {}
 
   async getFreeOfficers() {
@@ -103,11 +106,19 @@ export class NewValuationService {
 
     if (!projectId) return { success: false, message: 'Project not found' };
 
+    const property = user
+      ? await this.propertyRepo.findOne({
+          where: { user: { user_id: user.user_id } },
+          relations: ['user'],
+          order: { property_id: 'DESC' },
+        })
+      : null;
+
     const assignmentInsert = await this.assignedRepo.query(
-      `INSERT INTO assigned_to (to_id, time_date, project_id, loan_applicant_nic)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO assigned_to (to_id, time_date, project_id, loan_applicant_nic, property_address)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
-      [dto.toId, new Date(dto.timeDate), projectId, dto.nic],
+      [dto.toId, new Date(dto.timeDate), projectId, dto.nic, property?.address ?? null],
     );
     const assignmentId = assignmentInsert?.[0]?.id;
 
