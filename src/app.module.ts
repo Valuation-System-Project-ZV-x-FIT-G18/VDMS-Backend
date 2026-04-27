@@ -16,6 +16,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { ChatConversation } from './entities/chat-conversation.entity';
 import { ChatMessage } from './entities/chat-message.entity';
 import { MessagesModule } from './modules/messages/messages.module';
+import { AccountSetting } from './entities/account-setting.entity';
+import { AccountSettingsModule } from './modules/account-settings/account-settings.module';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { MessagesModule } from './modules/messages/messages.module';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [Project, Document, TeamMember, Invoice, Notification, ChatConversation, ChatMessage],
+      entities: [Project, Document, TeamMember, Invoice, Notification, ChatConversation, ChatMessage, AccountSetting],
       synchronize: true,
       logging: true,
     }),
@@ -40,6 +42,7 @@ import { MessagesModule } from './modules/messages/messages.module';
     InvoicesModule,
     NotificationsModule,
     MessagesModule,
+    AccountSettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
