@@ -1,18 +1,67 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm'; // TypeORM decorators
-import { User } from './user.entity'; // FK to users table
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
+import { Document } from './document.entity';
+import { TeamMember } from './team-member.entity';
 
-@Entity('projects') // maps to "projects" table
+export enum ProjectStatus {
+  PENDING = 'Pending',
+  IN_PROGRESS = 'In Progress',
+  SITE_INSPECTED = 'Site Inspected',
+  AWAITING_DOCS = 'Awaiting Docs',
+  REPORT_PREPARED = 'Report Prepared',
+  COMPLETED = 'Completed',
+  PAYMENT_PENDING = 'Payment Pending',
+}
+
+export enum PaymentStatus {
+  PENDING = 'Pending',
+  PAID = 'Paid',
+}
+
+@Entity('projects')
 export class Project {
-  @PrimaryColumn({ length: 6 }) // e.g. pro001 — "pro" + 3-digit number
-  project_id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user!: User;
+  @Column({ name: 'project_id', unique: true })
+  projectId!: string;
 
-  @Column({ default: 'pending' }) // current project status
-  status: string;
+  @Column({ name: 'property_address' })
+  propertyAddress!: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }) // when created
-  created_at: Date;
+  @Column()
+  applicant!: string;
+
+  @Column({ type: 'enum', enum: ProjectStatus, default: ProjectStatus.PENDING })
+  status!: ProjectStatus;
+
+  @Column({ name: 'requested_date', type: 'date', nullable: true })
+  requestedDate!: string | null;
+
+  @Column({ name: 'expected_completion', type: 'date', nullable: true })
+  expectedCompletion!: string | null;
+
+  @Column({ name: 'payment_status', type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  paymentStatus!: PaymentStatus;
+
+  @Column({ name: 'client_id' })
+  clientId!: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
+
+  @OneToMany(() => Document, (document) => document.project)
+  documents!: Document[];
+
+  @OneToMany(() => TeamMember, (teamMember) => teamMember.project)
+  teamMembers!: TeamMember[];
 }
