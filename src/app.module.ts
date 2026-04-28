@@ -30,6 +30,9 @@ import { SurveyPlan } from './entities/survey-plan.entity';
 import { LegalDetail } from './entities/legal-detail.entity';
 import { DocumentUpload } from './entities/document-upload.entity';
 import { TechnicalOfficer } from './entities/technical-officer.entity';
+import { TechnicalOfficerProject } from './entities/technical-officer-project.entity';
+import { TechnicalOfficerReport } from './entities/technical-officer-report.entity';
+import { TechnicalOfficerAttendance } from './entities/technical-officer-attendance.entity';
 import { OnLeave } from './entities/on-leave.entity';
 import { AssignedTo } from './entities/assigned-to.entity';
 import { FreeOfficer } from './entities/free-officer.entity';
@@ -52,6 +55,9 @@ import { AssignedModule } from './assigned/assigned.module';
 import { RejectedToModule } from './rejected-to/rejected-to.module';
 import { LayoutModule } from './layout/layout.module';
 import { ProjectSummaryModule } from './project-summary/project-summary.module';
+import { TechnicalOfficerProjectsModule } from './technical-officer-projects/technical-officer-projects.module';
+import { TechnicalOfficerReportsModule } from './technical-officer-reports/technical-officer-reports.module';
+import { TechnicalOfficerAttendanceModule } from './technical-officer-attendance/technical-officer-attendance.module';
 
 @Module({
   imports: [
@@ -79,6 +85,9 @@ import { ProjectSummaryModule } from './project-summary/project-summary.module';
         LegalDetail,
         DocumentUpload,
         TechnicalOfficer,
+        TechnicalOfficerProject,
+        TechnicalOfficerReport,
+        TechnicalOfficerAttendance,
         OnLeave,
         AssignedTo,
         FreeOfficer,
@@ -118,6 +127,9 @@ import { ProjectSummaryModule } from './project-summary/project-summary.module';
     RejectedToModule,
     LayoutModule,
     ProjectSummaryModule,
+    TechnicalOfficerProjectsModule,
+    TechnicalOfficerReportsModule,
+    TechnicalOfficerAttendanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
