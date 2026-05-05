@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AssignedService } from './assigned.service';
-import { ProjectIdQueryDto } from '../validation';
+import { ProjectIdQueryDto } from '../validate';
 
 @Controller('assigned')
 export class AssignedController {

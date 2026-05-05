@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
-import { ProjectIdQueryDto } from '../../validation';
+import { ProjectIdQueryDto } from '../../validate';
 
 @Controller('documents')
 export class DocumentsController {

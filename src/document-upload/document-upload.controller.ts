@@ -9,7 +9,11 @@ import {
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
+
+const UPLOADS_DIR = join(__dirname, '..', '..', 'uploads');
+if (!existsSync(UPLOADS_DIR)) mkdirSync(UPLOADS_DIR, { recursive: true });
 import { DocumentUploadService } from './document-upload.service';
 import { DocumentUploadDto } from './dto/document-upload.dto';
 
@@ -33,13 +37,13 @@ export class DocumentUploadController {
     FileFieldsInterceptor(
       [
         { name: 'nicCopy', maxCount: 1 },
-        { name: 'taxReceipts', maxCount: 1 },
-        { name: 'utilityBills', maxCount: 1 },
-        { name: 'otherDocs', maxCount: 1 },
+        { name: 'taxReceipts', maxCount: 10 },
+        { name: 'utilityBills', maxCount: 10 },
+        { name: 'otherDocs', maxCount: 10 },
       ],
       {
         storage: diskStorage({
-          destination: 'uploads',
+          destination: UPLOADS_DIR,
           filename: editFileName,
         }),
       },
