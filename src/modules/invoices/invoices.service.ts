@@ -14,7 +14,7 @@ export class InvoicesService {
   ) {}
 
   async findAll(clientId?: string, search?: string, status?: string) {
-    await this.seedIfEmpty(clientId);
+    await this.seedIfEmpty();
 
     const qb = this.invoiceRepository
       .createQueryBuilder('invoice')
@@ -71,16 +71,14 @@ export class InvoicesService {
     return this.invoiceRepository.save(invoice);
   }
 
-  private async seedIfEmpty(clientId?: string) {
+  private async seedIfEmpty() {
     const total = await this.invoiceRepository.count();
     if (total > 0) {
       return;
     }
 
-    const projectWhere = clientId ? { clientId } : {};
     const projects = await this.projectRepository.find({
-      where: projectWhere,
-      order: { createdAt: 'DESC' },
+      order: { created_at: 'DESC' },
       take: 12,
     });
 

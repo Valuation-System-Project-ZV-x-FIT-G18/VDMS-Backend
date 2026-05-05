@@ -1,13 +1,17 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { TeamMembersService } from './team-members.service';
 
 @Controller('team-members')
 export class TeamMembersController {
-  constructor(private readonly teamMembersService: TeamMembersService) {}
+  constructor(private teamMembersService: TeamMembersService) {}
 
-  // GET /team-members?projectId=xxx
   @Get()
-  findByProject(@Query('projectId') projectId: string) {
-    return this.teamMembersService.findByProject(projectId);
+  findAll() {
+    return this.teamMembersService.findAll();
+  }
+
+  @Post()
+  create(@Body() body: any) {
+    return this.teamMembersService.create(body);
   }
 }

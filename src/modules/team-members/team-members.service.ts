@@ -10,10 +10,12 @@ export class TeamMembersService {
     private teamMemberRepository: Repository<TeamMember>,
   ) {}
 
-  // Get all team members for a project
-  async findByProject(projectId: string): Promise<TeamMember[]> {
-    return this.teamMemberRepository.find({
-      where: { projectId },
-    });
+  findAll() {
+    return this.teamMemberRepository.find();
+  }
+
+  create(data: Partial<TeamMember>) {
+    const member = this.teamMemberRepository.create(data);
+    return this.teamMemberRepository.save(member);
   }
 }

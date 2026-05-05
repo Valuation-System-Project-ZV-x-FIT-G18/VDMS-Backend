@@ -1,25 +1,27 @@
-﻿import { Controller, Get, Patch, Param, Query } from '@nestjs/common';
+﻿import { Controller, Get, Patch, Post, Body, Param, Query } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(private notificationsService: NotificationsService) {}
 
-  // GET /notifications?recipientId=client-001
   @Get()
-  getForUser(@Query('recipientId') recipientId: string) {
-    return this.notificationsService.getForUser(recipientId);
+  findAll(@Query('managerId') managerId?: string) {
+    return this.notificationsService.findAll(managerId);
   }
 
-  // PATCH /notifications/:id/read
   @Patch(':id/read')
-  markAsRead(@Param('id') id: string) {
-    return this.notificationsService.markAsRead(id);
+  markRead(@Param('id') id: string) {
+    return this.notificationsService.markRead(id);
   }
 
-  // PATCH /notifications/mark-all-read?recipientId=client-001
   @Patch('mark-all-read')
-  markAllAsRead(@Query('recipientId') recipientId: string) {
-    return this.notificationsService.markAllAsRead(recipientId);
+  markAllRead(@Body() body: { managerId: string }) {
+    return this.notificationsService.markAllRead(body.managerId);
+  }
+
+  @Post()
+  create(@Body() body: any) {
+    return this.notificationsService.create(body);
   }
 }

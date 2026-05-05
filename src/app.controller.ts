@@ -6,7 +6,17 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getHello() {
+    return {
+      message: this.appService.getHello(),
+      status: 'running',
+      baseUrl: 'http://localhost:3000/api',
+      endpoints: {
+        auth: '/api/auth/login',
+        managers: '/api/managers',
+        approvals: '/api/approvals',
+        reviews: '/api/reviews',
+      },
+    };
   }
 }
