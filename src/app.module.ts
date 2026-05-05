@@ -5,6 +5,20 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './entities/user.entity';
 import { Project } from './entities/project.entity';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { Document } from './entities/document.entity';
+import { TeamMember } from './entities/team-member.entity';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { TeamMembersModule } from './modules/team-members/team-members.module';
+import { Invoice } from './entities/invoice.entity';
+import { InvoicesModule } from './modules/invoices/invoices.module';
+import { Notification } from './entities/notification.entity';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ChatConversation } from './entities/chat-conversation.entity';
+import { ChatMessage } from './entities/chat-message.entity';
+import { MessagesModule } from './modules/messages/messages.module';
+import { AccountSetting } from './entities/account-setting.entity';
+import { AccountSettingsModule } from './modules/account-settings/account-settings.module';
 import { LoanApplicant } from './entities/loan-applicant.entity';
 import { ProjectLoanApplicant } from './entities/project-loan-applicant.entity';
 import { ProjectValuation } from './entities/project-valuation.entity';
@@ -16,6 +30,9 @@ import { SurveyPlan } from './entities/survey-plan.entity';
 import { LegalDetail } from './entities/legal-detail.entity';
 import { DocumentUpload } from './entities/document-upload.entity';
 import { TechnicalOfficer } from './entities/technical-officer.entity';
+import { TechnicalOfficerProject } from './entities/technical-officer-project.entity';
+import { TechnicalOfficerReport } from './entities/technical-officer-report.entity';
+import { TechnicalOfficerAttendance } from './entities/technical-officer-attendance.entity';
 import { OnLeave } from './entities/on-leave.entity';
 import { AssignedTo } from './entities/assigned-to.entity';
 import { FreeOfficer } from './entities/free-officer.entity';
@@ -38,6 +55,9 @@ import { AssignedModule } from './assigned/assigned.module';
 import { RejectedToModule } from './rejected-to/rejected-to.module';
 import { LayoutModule } from './layout/layout.module';
 import { ProjectSummaryModule } from './project-summary/project-summary.module';
+import { TechnicalOfficerProjectsModule } from './technical-officer-projects/technical-officer-projects.module';
+import { TechnicalOfficerReportsModule } from './technical-officer-reports/technical-officer-reports.module';
+import { TechnicalOfficerAttendanceModule } from './technical-officer-attendance/technical-officer-attendance.module';
 
 @Module({
   imports: [
@@ -65,13 +85,30 @@ import { ProjectSummaryModule } from './project-summary/project-summary.module';
         LegalDetail,
         DocumentUpload,
         TechnicalOfficer,
+        TechnicalOfficerProject,
+        TechnicalOfficerReport,
+        TechnicalOfficerAttendance,
         OnLeave,
         AssignedTo,
         FreeOfficer,
         Rejected,
+        Document,
+        TeamMember,
+        Invoice,
+        Notification,
+        ChatConversation,
+        ChatMessage,
+        AccountSetting,
       ],
       synchronize: false,
     }),
+    ProjectsModule,
+    DocumentsModule,
+    TeamMembersModule,
+    InvoicesModule,
+    NotificationsModule,
+    MessagesModule,
+    AccountSettingsModule,
     UserModule,
     ProjectModule,
     LoanApplicantModule,
@@ -90,6 +127,9 @@ import { ProjectSummaryModule } from './project-summary/project-summary.module';
     RejectedToModule,
     LayoutModule,
     ProjectSummaryModule,
+    TechnicalOfficerProjectsModule,
+    TechnicalOfficerReportsModule,
+    TechnicalOfficerAttendanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

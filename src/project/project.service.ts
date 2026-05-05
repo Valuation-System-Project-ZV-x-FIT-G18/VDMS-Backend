@@ -12,6 +12,6 @@ export class ProjectService {
 
   /* Find a project by its ID (e.g. "pro001") */
   findById(projectId: string): Promise<Project | null> {
-    return this.projectRepo.findOne({ where: { project_id: projectId } });
+    return this.projectRepo.findOne({ where: { id: projectId } });
   }
 }
