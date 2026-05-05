@@ -7,6 +7,7 @@ import { BankProjectOfficer } from '../entities/bank-project-officer.entity'; //
 import { LoanApplicant } from '../entities/loan-applicant.entity';
 import { Project } from '../entities/project.entity'; // needed for junction FK
 import { ProjectLoanApplicant } from '../entities/project-loan-applicant.entity';
+import { ProjectValuation } from '../entities/project-valuation.entity';
 import { RegisterBankController } from './register-bank.controller';
 import { RegisterBankService } from './register-bank.service';
 
@@ -20,6 +21,7 @@ import { RegisterBankService } from './register-bank.service';
       LoanApplicant,
       Project,
       ProjectLoanApplicant,
+      ProjectValuation,
     ]),
   ],
   controllers: [RegisterBankController],

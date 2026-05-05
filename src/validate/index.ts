@@ -1,3 +1,15 @@
+// Section-specific validation DTOs
+export * from './common.validate';
+export * from './project-information.validate';
+export * from './loan-applicant-registration.validate';
+export * from './designation-bank.validate';
+export * from './land-location.validate';
+export * from './survey-plan.validate';
+export * from './deed-information.validate';
+export * from './document-uploads.validate';
+export * from './new-valuation.validate';
+
+// Shared field validators (migrated from validation/)
 export * from './bank-name.validation';
 export * from './birth-day.validation';
 export * from './branch-code.validation';
@@ -8,10 +20,11 @@ export * from './contact-number.validation';
 export * from './district.validation';
 export * from './email.validation';
 export * from './full-name.validation';
+export * from './legal-registration-date.validation';
 export * from './nic.validation';
+export * from './password.validation';
 export * from './postal-code.validation';
 export * from './project-id-query.dto';
 export * from './project-id.validation';
 export * from './province.validation';
 export * from './street-address.validation';
-export * from './password.validation';

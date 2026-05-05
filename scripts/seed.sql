@@ -1,8 +1,9 @@
--- VDMS seed data for local/team development
--- Usage:
--- psql -U postgres -d vdms_db -f scripts/seed.sql
+-- Unified seed entrypoint for fresh environments.
+-- Run from repository root:
+--   psql -U postgres -d vdms_db -f scripts/seed.sql
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+\i scripts/seed-technical-officers.sql
+\i scripts/add-city-to-technical-officers.sql
 
 DO $$
 BEGIN
@@ -341,3 +342,4 @@ SELECT COUNT(*) AS document_count FROM documents;
 SELECT COUNT(*) AS team_member_count FROM team_members;
 SELECT COUNT(*) AS notification_count FROM notifications;
 SELECT COUNT(*) AS account_settings_count FROM account_settings;
+>>>>>>> origin/dev
