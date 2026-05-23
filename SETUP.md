@@ -19,19 +19,25 @@ npm install
 Copy example file and edit values.
 
 ```bash
-cp .env.local.example .env
+cp .env.example .env
 ```
 
 Windows PowerShell alternative:
 
 ```powershell
-Copy-Item .env.local.example .env
+Copy-Item .env.example .env
 ```
 
 ## 4. Create database and seed data
 
 1. Create a database named vdms_db (or change DATABASE_NAME in .env).
-2. Run seed script:
+2. Load schema:
+
+```bash
+psql -U postgres -d vdms_db -f scripts/schema.sql
+```
+
+3. Run seed script:
 
 ```bash
 psql -U postgres -d vdms_db -f scripts/seed.sql
@@ -86,4 +92,6 @@ https://vdms-frontend.vercel.app,https://vdms-frontend-preview.vercel.app
 - Database connection error:
   - Verify DATABASE_URL or DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME.
 - Empty projects:
-  - Seed DB again with scripts/seed.sql.
+  - Re-run schema then seed:
+    - psql -U postgres -d vdms_db -f scripts/schema.sql
+    - psql -U postgres -d vdms_db -f scripts/seed.sql

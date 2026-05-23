@@ -8,20 +8,20 @@ import {
 } from 'typeorm';
 import { Document } from './document.entity';
 import { TeamMember } from './team-member.entity';
-import { Invoice } from './invoice.entity';
 
 export enum ProjectStatus {
+  PENDING = 'Pending',
+  IN_PROGRESS = 'In Progress',
   SITE_INSPECTED = 'Site Inspected',
   AWAITING_DOCS = 'Awaiting Docs',
+  REPORT_PREPARED = 'Report Prepared',
   COMPLETED = 'Completed',
   PAYMENT_PENDING = 'Payment Pending',
-  REPORT_PREPARED = 'Report Prepared',
-  IN_PROGRESS = 'In Progress',
 }
 
 export enum PaymentStatus {
-  PAID = 'Paid',
   PENDING = 'Pending',
+  PAID = 'Paid',
 }
 
 @Entity('projects')
@@ -35,32 +35,23 @@ export class Project {
   @Column({ name: 'property_address' })
   propertyAddress!: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  applicant!: string | null;
+  @Column()
+  applicant!: string;
 
-  @Column({
-    type: 'enum',
-    enum: ProjectStatus,
-    default: ProjectStatus.IN_PROGRESS,
-  })
+  @Column({ type: 'enum', enum: ProjectStatus, default: ProjectStatus.PENDING })
   status!: ProjectStatus;
 
-  @Column({ name: 'requested_date', type: 'date' })
-  requestedDate!: Date;
+  @Column({ name: 'requested_date', type: 'date', nullable: true })
+  requestedDate!: string | null;
 
-  @Column({ name: 'expected_completion', type: 'date' })
-  expectedCompletion!: Date;
+  @Column({ name: 'expected_completion', type: 'date', nullable: true })
+  expectedCompletion!: string | null;
 
-  @Column({
-    type: 'enum',
-    enum: PaymentStatus,
-    default: PaymentStatus.PENDING,
-    name: 'payment_status',
-  })
+  @Column({ name: 'payment_status', type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
   paymentStatus!: PaymentStatus;
 
-  @Column({ name: 'client_id', type: 'varchar', nullable: true })
-  clientId!: string | null;
+  @Column({ name: 'client_id' })
+  clientId!: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
@@ -73,7 +64,4 @@ export class Project {
 
   @OneToMany(() => TeamMember, (teamMember) => teamMember.project)
   teamMembers!: TeamMember[];
-
-  @OneToMany(() => Invoice, (invoice) => invoice.project)
-  invoices!: Invoice[];
 }
