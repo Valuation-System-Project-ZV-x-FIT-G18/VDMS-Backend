@@ -6,16 +6,25 @@ import {
   NotificationType,
   NotificationEvent,
 } from '../../entities/notification.entity';
+import { Project, ProjectStatus } from '../../entities/project.entity';
+import { Invoice, InvoiceStatus } from '../../entities/invoice.entity';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private notificationRepository: Repository<Notification>,
+    @InjectRepository(Project)
+    private projectRepository: Repository<Project>,
+    @InjectRepository(Invoice)
+    private invoiceRepository: Repository<Invoice>,
   ) {}
 
   // Get all notifications for a user
   async getForUser(recipientId: string): Promise<Notification[]> {
+    await this.syncWorkflowNotifications(recipientId);
+    await this.syncUnpaidInvoiceReminders(recipientId);
+
     return this.notificationRepository.find({
       where: { recipientId },
       order: { createdAt: 'DESC' },
@@ -51,6 +60,132 @@ export class NotificationsService {
   }): Promise<Notification> {
     const notification = this.notificationRepository.create(data);
     return this.notificationRepository.save(notification);
+  }
+
+  private async createIfMissing(data: {
+    type: NotificationType;
+    event: NotificationEvent;
+    title: string;
+    message: string;
+    recipientId: string;
+    recipientRole: string;
+    projectId?: string;
+  }): Promise<void> {
+    const existing = await this.notificationRepository.findOne({
+      where: {
+        recipientId: data.recipientId,
+        event: data.event,
+        title: data.title,
+      },
+    });
+
+    if (existing) {
+      return;
+    }
+
+    await this.create(data);
+  }
+
+  private async syncWorkflowNotifications(recipientId: string): Promise<void> {
+    const projects = await this.projectRepository.find({
+      where: { clientId: recipientId },
+      order: { createdAt: 'DESC' },
+    });
+
+    for (const project of projects) {
+      await this.createIfMissing({
+        type: NotificationType.SUCCESS,
+        event: NotificationEvent.PROJECT_CREATED,
+        title: `Valuation Job Created - ${project.projectId}`,
+        message: `A new valuation job (${project.projectId}) was created for ${project.propertyAddress}.`,
+        recipientId,
+        recipientRole: 'client',
+        projectId: project.id,
+      });
+
+      if (project.status === ProjectStatus.SITE_INSPECTED) {
+        await this.createIfMissing({
+          type: NotificationType.INFO,
+          event: NotificationEvent.STAGE_CHANGED,
+          title: `Site Inspection Completed - ${project.projectId}`,
+          message: `Technical officer has completed site inspection for valuation job ${project.projectId}.`,
+          recipientId,
+          recipientRole: 'client',
+          projectId: project.id,
+        });
+      }
+
+      if (project.status === ProjectStatus.REPORT_PREPARED) {
+        await this.createIfMissing({
+          type: NotificationType.SUCCESS,
+          event: NotificationEvent.REPORT_PREPARED,
+          title: `Report Prepared - ${project.projectId}`,
+          message: `Valuation report for job ${project.projectId} has been prepared and is moving through approvals.`,
+          recipientId,
+          recipientRole: 'client',
+          projectId: project.id,
+        });
+      }
+
+      if (project.status === ProjectStatus.COMPLETED) {
+        await this.createIfMissing({
+          type: NotificationType.SUCCESS,
+          event: NotificationEvent.PROJECT_COMPLETED,
+          title: `Project Completed - ${project.projectId}`,
+          message: `Valuation job ${project.projectId} has been fully completed.`,
+          recipientId,
+          recipientRole: 'client',
+          projectId: project.id,
+        });
+      }
+    }
+  }
+
+  private async syncUnpaidInvoiceReminders(recipientId: string): Promise<void> {
+    const invoices = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.project', 'project')
+      .where('project.clientId = :recipientId', { recipientId })
+      .andWhere('invoice.status != :paidStatus', { paidStatus: InvoiceStatus.PAID })
+      .orderBy('invoice.createdAt', 'DESC')
+      .getMany();
+
+    const nowMs = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+
+    for (const invoice of invoices) {
+      const createdAtMs = new Date(invoice.createdAt).getTime();
+      const ageDays = Math.floor((nowMs - createdAtMs) / dayMs);
+      const projectId = invoice.project?.projectId || '-';
+      const amountText = Number(invoice.amount).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      if (ageDays >= 7) {
+        await this.createIfMissing({
+          type: NotificationType.WARNING,
+          event: NotificationEvent.PAYMENT_DUE,
+          title: `Payment Reminder (7 Days) - ${invoice.invoiceId}`,
+          message: `Payment for valuation job ${projectId} is still pending after 7 days. Invoice ${invoice.invoiceId} amount: LKR ${amountText}.`,
+          recipientId,
+          recipientRole: 'client',
+          projectId: invoice.projectId,
+        });
+      }
+
+      if (ageDays >= 14) {
+        await this.createIfMissing({
+          type: NotificationType.ERROR,
+          event: NotificationEvent.PAYMENT_DUE,
+          title: `Payment Warning (14 Days) - ${invoice.invoiceId}`,
+          message: `Urgent: payment for valuation job ${projectId} remains unpaid for 14 days. Invoice ${invoice.invoiceId} amount: LKR ${amountText}.`,
+          recipientId,
+          recipientRole: 'client',
+          projectId: invoice.projectId,
+        });
+      }
+    }
   }
 
   // Trigger: Project Created
