@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Invoice, InvoiceStatus } from '../../entities/invoice.entity';
 import { Project } from '../../entities/project.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationEvent, NotificationType } from '../../entities/notification.entity';
 
 @Injectable()
 export class InvoicesService {
@@ -11,7 +13,72 @@ export class InvoicesService {
     private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    private readonly notificationsService: NotificationsService,
   ) {}
+
+  async createFromL1Approval(input: {
+    projectId: string;
+    amount: number;
+    l1ManagerId?: string;
+  }) {
+    const normalizedProjectId = (input.projectId || '').trim();
+    const parsedAmount = Number(input.amount);
+
+    if (!normalizedProjectId) {
+      throw new BadRequestException('projectId is required');
+    }
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      throw new BadRequestException('amount must be greater than 0');
+    }
+
+    const project = await this.projectRepository.findOne({
+      where: [{ id: normalizedProjectId }, { projectId: normalizedProjectId }],
+    });
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    const existingInvoice = await this.invoiceRepository.findOne({
+      where: { projectId: project.id },
+      order: { createdAt: 'DESC' },
+    });
+
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 7);
+
+    const invoice = existingInvoice
+      ? Object.assign(existingInvoice, {
+          amount: parsedAmount,
+          dueDate,
+          status: InvoiceStatus.PENDING,
+        })
+      : this.invoiceRepository.create({
+          invoiceId: `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`,
+          projectId: project.id,
+          amount: parsedAmount,
+          dueDate,
+          status: InvoiceStatus.PENDING,
+          paymentProofFileName: null,
+          paymentProofUploadedAt: null,
+          coordinatorNotifiedAt: null,
+        });
+
+    const savedInvoice = await this.invoiceRepository.save(invoice);
+
+    await this.notificationsService.create({
+      type: NotificationType.INFO,
+      event: NotificationEvent.PAYMENT_DUE,
+      title: `Payment Invoice Generated - ${project.projectId}`,
+      message: `Invoice ${savedInvoice.invoiceId} for valuation job ${project.projectId} is ready. Amount: LKR ${parsedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. Due date: ${dueDate.toISOString().slice(0, 10)}.`,
+      recipientId: input.l1ManagerId || 'user-l1-manager-001',
+      recipientRole: 'l1-manager',
+      projectId: project.id,
+    });
+
+    return this.findOne(savedInvoice.id);
+  }
 
   async findAll(clientId?: string, search?: string, status?: string) {
     await this.seedIfEmpty();
@@ -57,18 +124,40 @@ export class InvoicesService {
 
     invoice.paymentProofFileName = fileName;
     invoice.paymentProofUploadedAt = new Date();
+    invoice.status = InvoiceStatus.PAID;
 
-    if (invoice.status === InvoiceStatus.OVERDUE) {
+    return this.invoiceRepository.save(invoice);
+  }
+
+  async removePaymentProof(id: string) {
+    const invoice = await this.findOne(id);
+
+    invoice.paymentProofFileName = null;
+    invoice.paymentProofUploadedAt = null;
+
+    if (invoice.status === InvoiceStatus.PAID) {
       invoice.status = InvoiceStatus.PENDING;
     }
 
     return this.invoiceRepository.save(invoice);
   }
 
-  async notifyCoordinator(id: string) {
+  async notifyL1Manager(id: string, l1ManagerId?: string) {
     const invoice = await this.findOne(id);
     invoice.coordinatorNotifiedAt = new Date();
-    return this.invoiceRepository.save(invoice);
+    const savedInvoice = await this.invoiceRepository.save(invoice);
+
+    await this.notificationsService.create({
+      type: NotificationType.INFO,
+      event: NotificationEvent.PAYMENT_DUE,
+      title: `Payment Proof Uploaded - ${savedInvoice.invoiceId}`,
+      message: `Payment proof was uploaded for valuation job ${savedInvoice.project?.projectId || '-'}. Invoice amount: LKR ${Number(savedInvoice.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`,
+      recipientId: l1ManagerId || 'user-l1-manager-001',
+      recipientRole: 'l1-manager',
+      projectId: savedInvoice.projectId,
+    });
+
+    return savedInvoice;
   }
 
   private async seedIfEmpty() {

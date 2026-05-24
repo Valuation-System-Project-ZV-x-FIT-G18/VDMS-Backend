@@ -1,27 +1,47 @@
-﻿import { Controller, Get, Patch, Post, Body, Param, Query } from '@nestjs/common';
+﻿import { Body, Controller, Get, Patch, Param, Post, Query } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
+import { NotificationEvent, NotificationType } from '../../entities/notification.entity';
 
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private notificationsService: NotificationsService) {}
-
-  @Get()
-  findAll(@Query('managerId') managerId?: string) {
-    return this.notificationsService.findAll(managerId);
-  }
-
-  @Patch(':id/read')
-  markRead(@Param('id') id: string) {
-    return this.notificationsService.markRead(id);
-  }
-
-  @Patch('mark-all-read')
-  markAllRead(@Body() body: { managerId: string }) {
-    return this.notificationsService.markAllRead(body.managerId);
-  }
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
-  create(@Body() body: any) {
-    return this.notificationsService.create(body);
+  create(
+    @Body('type') type: NotificationType,
+    @Body('event') event: NotificationEvent,
+    @Body('title') title: string,
+    @Body('message') message: string,
+    @Body('recipientId') recipientId: string,
+    @Body('recipientRole') recipientRole: string,
+    @Body('projectId') projectId?: string,
+  ) {
+    return this.notificationsService.create({
+      type,
+      event,
+      title,
+      message,
+      recipientId,
+      recipientRole,
+      projectId,
+    });
+  }
+
+  // GET /notifications?recipientId=client-001
+  @Get()
+  getForUser(@Query('recipientId') recipientId: string) {
+    return this.notificationsService.getForUser(recipientId);
+  }
+
+  // PATCH /notifications/:id/read
+  @Patch(':id/read')
+  markAsRead(@Param('id') id: string) {
+    return this.notificationsService.markAsRead(id);
+  }
+
+  // PATCH /notifications/mark-all-read?recipientId=client-001
+  @Patch('mark-all-read')
+  markAllAsRead(@Query('recipientId') recipientId: string) {
+    return this.notificationsService.markAllAsRead(recipientId);
   }
 }
