@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
+import { ProjectIdQueryDto } from '../../validate';
 
 @Controller('documents')
 export class DocumentsController {
@@ -7,8 +8,8 @@ export class DocumentsController {
 
   // GET /documents?projectId=xxx
   @Get()
-  findByProject(@Query('projectId') projectId: string) {
-    return this.documentsService.findByProject(projectId);
+  findByProject(@Query() query: ProjectIdQueryDto) {
+    return this.documentsService.findByProject(query.projectId);
   }
 
   // GET /documents/:id
