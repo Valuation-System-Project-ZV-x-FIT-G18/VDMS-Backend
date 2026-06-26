@@ -38,6 +38,59 @@ export class DocumentUploadService {
     return `pro${String(next).padStart(3, '0')}`;
   }
 
+  private parseListValue(value?: string): string[] {
+    if (!value) return [];
+
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.map(String).filter(Boolean);
+        }
+      } catch {
+        // keep legacy fallback behavior
+      }
+    }
+
+    if (trimmed.includes('||')) {
+      return trimmed.split('||').map((part) => part.trim()).filter(Boolean);
+    }
+
+    return [value];
+  }
+
+  private resolveMultiField(
+    uploaded: UploadedFile[] | undefined,
+    dtoNames: string | undefined,
+    dtoPaths: string | undefined,
+    existingNames: string | undefined,
+    existingPaths: string | undefined,
+    toUrl: (file?: UploadedFile) => string | undefined,
+  ): { names?: string; paths?: string } {
+    if (uploaded && uploaded.length > 0) {
+      const names = uploaded.map((f) => f.originalname);
+      const paths = uploaded.map((f) => toUrl(f) ?? f.originalname);
+      return {
+        names: JSON.stringify(names),
+        paths: JSON.stringify(paths),
+      };
+    }
+
+    if (dtoNames || dtoPaths) {
+      const names = this.parseListValue(dtoNames);
+      const paths = this.parseListValue(dtoPaths);
+      return {
+        names: names.length ? JSON.stringify(names) : undefined,
+        paths: paths.length ? JSON.stringify(paths) : undefined,
+      };
+    }
+
+    return { names: existingNames, paths: existingPaths };
+  }
+
   async save(
     dto: DocumentUploadDto,
     files: { [field: string]: UploadedFile[] },
@@ -62,28 +115,43 @@ export class DocumentUploadService {
     const url = (f?: UploadedFile) =>
       f?.filename ? `${base}/uploads/${f.filename}` : undefined;
     const nicFile = files?.nicCopy?.[0];
-    const taxFile = files?.taxReceipts?.[0];
-    const utilityFile = files?.utilityBills?.[0];
-    const otherFile = files?.otherDocs?.[0];
+    const taxFiles = files?.taxReceipts;
+    const utilityFiles = files?.utilityBills;
+    const otherFiles = files?.otherDocs;
+    const taxMulti = this.resolveMultiField(
+      taxFiles,
+      dto.taxFileName,
+      dto.taxFilePath,
+      existing?.tax_file_name,
+      existing?.tax_file_path,
+      url,
+    );
+    const utilityMulti = this.resolveMultiField(
+      utilityFiles,
+      dto.utilityFileName,
+      dto.utilityFilePath,
+      existing?.utility_file_name,
+      existing?.utility_file_path,
+      url,
+    );
+    const otherMulti = this.resolveMultiField(
+      otherFiles,
+      dto.otherFileName,
+      dto.otherFilePath,
+      existing?.other_file_name,
+      existing?.other_file_path,
+      url,
+    );
     const data = {
       nic_file_name:
         nicFile?.originalname ?? dto.nicFileName ?? existing?.nic_file_name,
       nic_file_path: url(nicFile) ?? dto.nicFilePath ?? existing?.nic_file_path,
-      tax_file_name:
-        taxFile?.originalname ?? dto.taxFileName ?? existing?.tax_file_name,
-      tax_file_path: url(taxFile) ?? dto.taxFilePath ?? existing?.tax_file_path,
-      utility_file_name:
-        utilityFile?.originalname ??
-        dto.utilityFileName ??
-        existing?.utility_file_name,
-      utility_file_path:
-        url(utilityFile) ?? dto.utilityFilePath ?? existing?.utility_file_path,
-      other_file_name:
-        otherFile?.originalname ??
-        dto.otherFileName ??
-        existing?.other_file_name,
-      other_file_path:
-        url(otherFile) ?? dto.otherFilePath ?? existing?.other_file_path,
+      tax_file_name: taxMulti.names,
+      tax_file_path: taxMulti.paths,
+      utility_file_name: utilityMulti.names,
+      utility_file_path: utilityMulti.paths,
+      other_file_name: otherMulti.names,
+      other_file_path: otherMulti.paths,
       user,
     };
 

@@ -16,7 +16,7 @@ async function bootstrap() {
     'http://localhost:5178',
   ]);
 
-  const uploadsPath = join(process.cwd(), 'uploads');
+  const uploadsPath = join(__dirname, '..', 'uploads');
   if (!existsSync(uploadsPath)) {
     mkdirSync(uploadsPath, { recursive: true });
   }
@@ -30,15 +30,16 @@ async function bootstrap() {
     }),
   );
 
-  const port = parseInt(process.env.PORT ?? '3000', 10);
   const frontendOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:5173')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
+  frontendOrigins.forEach((origin) => allowedOrigins.add(origin));
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.has(origin)) {
+      // Allow any localhost port (development) and the configured origins
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin) || allowedOrigins.has(origin)) {
         callback(null, true);
         return;
       }

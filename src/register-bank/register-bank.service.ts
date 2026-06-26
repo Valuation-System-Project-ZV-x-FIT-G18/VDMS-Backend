@@ -11,6 +11,7 @@ import { BankProjectOfficer } from '../entities/bank-project-officer.entity';
 import { LoanApplicant } from '../entities/loan-applicant.entity';
 import { Project } from '../entities/project.entity';
 import { ProjectLoanApplicant } from '../entities/project-loan-applicant.entity';
+import { ProjectValuation } from '../entities/project-valuation.entity';
 import { UserRole } from '../enums/user-role.enum';
 import { RegisterBankDto } from './dto/register-bank.dto';
 
@@ -29,7 +30,26 @@ export class RegisterBankService {
     private readonly projectRepo: Repository<Project>,
     @InjectRepository(ProjectLoanApplicant)
     private readonly projectLoanApplicantRepo: Repository<ProjectLoanApplicant>,
+    @InjectRepository(ProjectValuation)
+    private readonly projectValuationRepo: Repository<ProjectValuation>,
   ) {}
+
+  private async ensureValuationColumnOnBankProjectOfficer() {
+    await this.junctionRepo.query(
+      'ALTER TABLE bank_project_officer ADD COLUMN IF NOT EXISTS valuation_id integer',
+    );
+  }
+
+  private async getNextValuationId(projectId: string): Promise<number> {
+    const last = await this.projectValuationRepo
+      .createQueryBuilder('projectValuation')
+      .select('projectValuation.valuation_id', 'valuation_id')
+      .where('projectValuation.project_id = :projectId', { projectId })
+      .orderBy('projectValuation.valuation_id', 'DESC')
+      .getRawOne<{ valuation_id: number }>();
+
+    return (last?.valuation_id ?? 0) + 1;
+  }
 
   private async getNextBankId() {
     const rows = await this.bankRepo.query(
@@ -281,5 +301,82 @@ export class RegisterBankService {
 
       throw error;
     }
+  }
+
+  async registerForRevaluation(dto: RegisterBankDto) {
+    await this.ensureValuationColumnOnBankProjectOfficer();
+
+    const targetProjectId = await this.resolveTargetProjectId(dto.applicantNic);
+    if (!targetProjectId) {
+      throw new ConflictException('Unable to resolve project for applicant NIC');
+    }
+
+    const valuationId = await this.getNextValuationId(targetProjectId);
+
+    const bank = this.bankRepo.create({
+      bank_id: await this.getNextBankId(),
+      bank_name: dto.bankName,
+      branch: dto.branch,
+      branch_code: dto.branchCode,
+    });
+    await this.bankRepo.save(bank);
+
+    let user = await this.userRepo.findOne({
+      where: [{ nic: dto.nic }, { email: dto.email }],
+    });
+
+    if (user && user.role !== UserRole.BANK) {
+      throw new ConflictException('A user with this NIC or email already exists');
+    }
+
+    if (!user) {
+      user = this.userRepo.create({
+        user_id: await this.getNextUserId(),
+        nic: dto.nic,
+        email: dto.email,
+        password: 'temp-password',
+        role: UserRole.BANK,
+        full_name: dto.fullName,
+        first_name: dto.firstName,
+        last_name: dto.lastName,
+        name_with_initials: dto.nameWithInitials,
+        phone: dto.phone,
+        street_address: '',
+        city: '',
+        district: '',
+        province: '',
+      });
+      await this.userRepo.save(user);
+    } else {
+      user.full_name = dto.fullName;
+      user.first_name = dto.firstName;
+      user.last_name = dto.lastName;
+      user.name_with_initials = dto.nameWithInitials;
+      user.phone = dto.phone;
+      user.email = dto.email;
+      await this.userRepo.save(user);
+    }
+
+    const officer = this.officerRepo.create({
+      officer_id: await this.getNextOfficerId(),
+      user,
+      designation: dto.designation || undefined,
+    });
+    await this.officerRepo.save(officer);
+
+    await this.junctionRepo.query(
+      'INSERT INTO bank_project_officer (bank_id, project_id, officer_id, valuation_id) VALUES ($1, $2, $3, $4)',
+      [bank.bank_id, targetProjectId, officer.officer_id, valuationId],
+    );
+
+    return {
+      success: true,
+      bankId: bank.bank_id,
+      officerId: officer.officer_id,
+      projectId: targetProjectId,
+      valuationId,
+      message:
+        'Saved bank info as a new record linked to same project with a new associated valuation id',
+    };
   }
 }

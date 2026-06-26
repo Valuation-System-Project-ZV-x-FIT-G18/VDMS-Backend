@@ -10,4 +10,9 @@ export class RegisterBankController {
   register(@Body() dto: RegisterBankDto) {
     return this.service.register(dto); // delegate to service
   }
+
+  @Post('revaluation')
+  registerForRevaluation(@Body() dto: RegisterBankDto) {
+    return this.service.registerForRevaluation(dto);
+  }
 }

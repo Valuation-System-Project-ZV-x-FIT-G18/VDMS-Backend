@@ -12,6 +12,7 @@ Use this checklist before sharing with friends.
 ## Database
 
 - [ ] PostgreSQL server is reachable from backend host
+- [ ] Run scripts/schema.sql in target database
 - [ ] Run scripts/seed.sql in target database
 - [ ] Verify rows exist in projects, documents, team_members, notifications
 

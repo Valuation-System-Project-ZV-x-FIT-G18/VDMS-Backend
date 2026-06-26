@@ -1,9 +1,31 @@
-﻿import { Controller, Get, Patch, Param, Query } from '@nestjs/common';
+﻿import { Body, Controller, Get, Patch, Param, Post, Query } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
+import { NotificationEvent, NotificationType } from '../../entities/notification.entity';
 
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
+
+  @Post()
+  create(
+    @Body('type') type: NotificationType,
+    @Body('event') event: NotificationEvent,
+    @Body('title') title: string,
+    @Body('message') message: string,
+    @Body('recipientId') recipientId: string,
+    @Body('recipientRole') recipientRole: string,
+    @Body('projectId') projectId?: string,
+  ) {
+    return this.notificationsService.create({
+      type,
+      event,
+      title,
+      message,
+      recipientId,
+      recipientRole,
+      projectId,
+    });
+  }
 
   // GET /notifications?recipientId=client-001
   @Get()

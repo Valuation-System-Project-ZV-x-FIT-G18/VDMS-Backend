@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { TeamMembersService } from './team-members.service';
-import { ProjectIdQueryDto } from '../../validation';
+import { ProjectIdQueryDto } from '../../validate';
 
 @Controller('team-members')
 export class TeamMembersController {

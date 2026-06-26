@@ -43,25 +43,8 @@ export class MessagesService {
         order: { updatedAt: 'DESC' },
       });
 
-      // Filter for conversations where user is a participant (by ID)
-      let filtered = all.filter((c) => c.participantIds?.includes(userId));
-
-      // If role provided, also include conversations where user's role matches
-      if (role) {
-        const roleMatched = all.filter((c) => {
-          return Object.values(c.participantRoles || {}).includes(role);
-        });
-        // Merge and deduplicate
-        const allConvs = [...filtered, ...roleMatched];
-        const seen = new Set<string>();
-        filtered = allConvs.filter((c) => {
-          if (seen.has(c.id)) return false;
-          seen.add(c.id);
-          return true;
-        });
-      }
-
-      return filtered;
+      // Return only conversations where this exact user ID is a participant.
+      return all.filter((c) => c.participantIds?.includes(userId));
     } catch (error) {
       console.error('Error listing conversations:', error);
       return [];

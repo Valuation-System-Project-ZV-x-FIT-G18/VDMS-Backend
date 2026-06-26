@@ -1,8 +1,9 @@
--- VDMS seed data for local/team development
--- Usage:
--- psql -U postgres -d vdms_db -f scripts/seed.sql
+-- Unified seed entrypoint for fresh environments.
+-- Run from repository root:
+--   psql -U postgres -d vdms_db -f scripts/seed.sql
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+\i scripts/seed-technical-officers.sql
+\i scripts/add-city-to-technical-officers.sql
 
 DO $$
 BEGIN
@@ -41,13 +42,30 @@ WHERE project_id IN (
   SELECT id
   FROM projects
   WHERE project_id IN (
+    'VAL-2026-001',
+    'VAL-2026-002',
+    'VAL-2026-003',
+    'VAL-2026-004',
+    'VAL-2026-005',
+    'VAL-2026-006',
+    'VAL-2026-007',
+    'VAL-2026-008',
+    'VAL-2026-009',
+    'VAL-2026-010',
     'PROJ-2023-001',
     'PROJ-2023-002',
     'PROJ-2023-003',
     'PROJ-2023-004',
     'PROJ-2023-005',
     'PROJ-2023-006',
-    'PROJ-2023-007'
+    'PROJ-2023-007',
+    'VAL-2023-001',
+    'VAL-2023-002',
+    'VAL-2023-003',
+    'VAL-2023-004',
+    'VAL-2023-005',
+    'VAL-2023-006',
+    'VAL-2023-007'
   )
 );
 
@@ -56,13 +74,30 @@ WHERE project_id IN (
   SELECT id
   FROM projects
   WHERE project_id IN (
+    'VAL-2026-001',
+    'VAL-2026-002',
+    'VAL-2026-003',
+    'VAL-2026-004',
+    'VAL-2026-005',
+    'VAL-2026-006',
+    'VAL-2026-007',
+    'VAL-2026-008',
+    'VAL-2026-009',
+    'VAL-2026-010',
     'PROJ-2023-001',
     'PROJ-2023-002',
     'PROJ-2023-003',
     'PROJ-2023-004',
     'PROJ-2023-005',
     'PROJ-2023-006',
-    'PROJ-2023-007'
+    'PROJ-2023-007',
+    'VAL-2023-001',
+    'VAL-2023-002',
+    'VAL-2023-003',
+    'VAL-2023-004',
+    'VAL-2023-005',
+    'VAL-2023-006',
+    'VAL-2023-007'
   )
 );
 
@@ -71,25 +106,59 @@ WHERE project_id IN (
   SELECT id
   FROM projects
   WHERE project_id IN (
+    'VAL-2026-001',
+    'VAL-2026-002',
+    'VAL-2026-003',
+    'VAL-2026-004',
+    'VAL-2026-005',
+    'VAL-2026-006',
+    'VAL-2026-007',
+    'VAL-2026-008',
+    'VAL-2026-009',
+    'VAL-2026-010',
     'PROJ-2023-001',
     'PROJ-2023-002',
     'PROJ-2023-003',
     'PROJ-2023-004',
     'PROJ-2023-005',
     'PROJ-2023-006',
-    'PROJ-2023-007'
+    'PROJ-2023-007',
+    'VAL-2023-001',
+    'VAL-2023-002',
+    'VAL-2023-003',
+    'VAL-2023-004',
+    'VAL-2023-005',
+    'VAL-2023-006',
+    'VAL-2023-007'
   )
 );
 
 DELETE FROM projects
 WHERE project_id IN (
+  'VAL-2026-001',
+  'VAL-2026-002',
+  'VAL-2026-003',
+  'VAL-2026-004',
+  'VAL-2026-005',
+  'VAL-2026-006',
+  'VAL-2026-007',
+  'VAL-2026-008',
+  'VAL-2026-009',
+  'VAL-2026-010',
   'PROJ-2023-001',
   'PROJ-2023-002',
   'PROJ-2023-003',
   'PROJ-2023-004',
   'PROJ-2023-005',
   'PROJ-2023-006',
-  'PROJ-2023-007'
+  'PROJ-2023-007',
+  'VAL-2023-001',
+  'VAL-2023-002',
+  'VAL-2023-003',
+  'VAL-2023-004',
+  'VAL-2023-005',
+  'VAL-2023-006',
+  'VAL-2023-007'
 );
 
 -- Projects
@@ -107,13 +176,16 @@ INSERT INTO projects (
   updated_at
 )
 VALUES
-  (gen_random_uuid(), 'VAL-2026-001', '123 Galle Rd, Colombo 03', 'John Doe', 'Site Inspected', '2023-10-24', '2023-10-28', 'Pending', 'client-001', NOW() - INTERVAL '6 days', NOW() - INTERVAL '6 days'),
-  (gen_random_uuid(), 'VAL-2026-002', '45 Kandy Rd, Kelaniya', 'John Doe', 'Awaiting Docs', '2023-10-23', '2023-10-29', 'Paid', 'client-001', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days'),
-  (gen_random_uuid(), 'VAL-2026-003', '89 Duplication Rd, Col 03', 'John Doe', 'Completed', '2023-10-20', '2023-10-24', 'Paid', 'client-001', NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days'),
-  (gen_random_uuid(), 'VAL-2026-004', '12 Marine Dr, Col 04', 'John Doe', 'Payment Pending', '2023-10-19', '2023-10-24', 'Pending', 'client-001', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days'),
-  (gen_random_uuid(), 'VAL-2026-005', '56 High Level Rd, Nugegoda', 'John Doe', 'Report Prepared', '2023-10-22', '2023-10-27', 'Paid', 'client-001', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
-  (gen_random_uuid(), 'VAL-2026-006', '78 Temple Rd, Maharagama', 'John Doe', 'In Progress', '2023-10-25', '2023-10-30', 'Pending', 'client-001', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),
-  (gen_random_uuid(), 'VAL-2026-007', '34 Station Rd, Dehiwala', 'John Doe', 'Completed', '2023-10-15', '2023-10-20', 'Paid', 'client-001', NOW(), NOW());
+  (gen_random_uuid(), 'VAL-2026-001', '123 Galle Rd, Colombo 03', 'John Doe', 'Site Inspected', '2026-10-24', '2026-10-28', 'Pending', 'client-001', NOW() - INTERVAL '6 days', NOW() - INTERVAL '6 days'),
+  (gen_random_uuid(), 'VAL-2026-002', '45 Kandy Rd, Kelaniya', 'John Doe', 'Awaiting Docs', '2026-10-23', '2026-10-29', 'Paid', 'client-001', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days'),
+  (gen_random_uuid(), 'VAL-2026-003', '89 Duplication Rd, Col 03', 'John Doe', 'Completed', '2026-10-20', '2026-10-24', 'Paid', 'client-001', NOW() - INTERVAL '4 days', NOW() - INTERVAL '4 days'),
+  (gen_random_uuid(), 'VAL-2026-004', '12 Marine Dr, Col 04', 'John Doe', 'Payment Pending', '2026-10-19', '2026-10-24', 'Pending', 'client-001', NOW() - INTERVAL '3 days', NOW() - INTERVAL '3 days'),
+  (gen_random_uuid(), 'VAL-2026-005', '56 High Level Rd, Nugegoda', 'John Doe', 'Report Prepared', '2026-10-22', '2026-10-27', 'Paid', 'client-001', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
+  (gen_random_uuid(), 'VAL-2026-006', '78 Temple Rd, Maharagama', 'John Doe', 'In Progress', '2026-10-25', '2026-10-30', 'Pending', 'client-001', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),
+  (gen_random_uuid(), 'VAL-2026-007', '34 Station Rd, Dehiwala', 'John Doe', 'Completed', '2026-10-15', '2026-10-20', 'Paid', 'client-001', NOW(), NOW()),
+  (gen_random_uuid(), 'VAL-2026-008', '88 Horton Place, Colombo 07', 'John Doe', 'Needs Review', '2026-10-21', '2026-10-27', 'Pending', 'client-001', NOW() - INTERVAL '8 hours', NOW() - INTERVAL '8 hours'),
+  (gen_random_uuid(), 'VAL-2026-009', '14 Lake Drive, Nugegoda', 'John Doe', 'Payment Pending', '2026-10-20', '2026-10-26', 'Pending', 'client-001', NOW() - INTERVAL '7 hours', NOW() - INTERVAL '7 hours'),
+  (gen_random_uuid(), 'VAL-2026-010', '7 Palm Grove, Malabe', 'John Doe', 'Needs Review', '2026-10-18', '2026-10-25', 'Pending', 'client-001', NOW() - INTERVAL '6 hours', NOW() - INTERVAL '6 hours');
 
 -- Documents for VAL-2026-001
 INSERT INTO documents (id, name, status, uploaded_by, required, note, project_id, upload_date)
@@ -125,7 +197,7 @@ VALUES
     'John Doe',
     false,
     NULL,
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001'),
     NOW() - INTERVAL '1 day'
   ),
   (
@@ -135,7 +207,7 @@ VALUES
     'John Doe',
     false,
     NULL,
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001'),
     NOW() - INTERVAL '2 days'
   ),
   (
@@ -145,7 +217,7 @@ VALUES
     NULL,
     true,
     'Required for site verification',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001'),
     NOW()
   ),
   (
@@ -155,11 +227,11 @@ VALUES
     NULL,
     false,
     'Waiting for client',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001'),
     NOW()
   );
 
--- Team members for PROJ-2023-001
+-- Team members for VAL-2026-001
 INSERT INTO team_members (id, name, role, email, phone, project_id)
 VALUES
   (
@@ -168,39 +240,39 @@ VALUES
     'coordinator',
     'alice@example.com',
     '+94 77 111 2222',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001')
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001')
   ),
   (
     gen_random_uuid(),
     'Marcus Johnson',
-    'Technical officer',
+    'technical-officer',
     'marcus@example.com',
     '+94 77 333 4444',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001')
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001')
   ),
   (
     gen_random_uuid(),
     'Sarah Jenkins',
-    'Manager',
+    'l1-manager',
     'sarah@example.com',
     '+94 77 555 6666',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001')
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001')
   ),
   (
     gen_random_uuid(),
     'David Brown',
-    'Senior Valuator',
+    'l2-manager',
     'david@example.com',
     '+94 77 777 8888',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001')
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001')
   ),
   (
     gen_random_uuid(),
     'Emma Wilson',
-    'Technical officer',
+    'l3-manager',
     'emma@example.com',
     '+94 77 999 0000',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001')
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001')
   );
 
 -- Notifications
@@ -210,11 +282,11 @@ VALUES
     gen_random_uuid(),
     'success',
     'PROJECT_CREATED',
-    'Valuation Job Created - PROJ-2023-001',
+    'Valuation Job Created - VAL-2026-001',
     'A new valuation job has been created for 123 Galle Road, Colombo 03.',
     'client-001',
     'bank_credit_officer',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-001'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-001'),
     false,
     NOW() - INTERVAL '2 minutes'
   ),
@@ -222,11 +294,11 @@ VALUES
     gen_random_uuid(),
     'warning',
     'DOCUMENT_MISSING',
-    'Documents Missing - PROJ-2023-002',
-    'Survey Plan and Deed Copy are still pending for PROJ-2023-002. Please upload them to proceed.',
+    'Documents Missing - VAL-2026-002',
+    'Survey Plan and Deed Copy are still pending for VAL-2026-002. Please upload them to proceed.',
     'client-001',
     'bank_credit_officer',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-002'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-002'),
     false,
     NOW() - INTERVAL '1 hour'
   ),
@@ -234,11 +306,11 @@ VALUES
     gen_random_uuid(),
     'error',
     'PAYMENT_DUE',
-    'Payment Due - PROJ-2023-004',
-    'Invoice of LKR 150,000 for PROJ-2023-004 is overdue. Please process the payment to avoid delays.',
+    'Payment Due - VAL-2026-004',
+    'Invoice of LKR 150,000 for VAL-2026-004 is overdue. Please process the payment to avoid delays.',
     'client-001',
     'bank_credit_officer',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-004'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-004'),
     false,
     NOW() - INTERVAL '3 hours'
   ),
@@ -246,11 +318,11 @@ VALUES
     gen_random_uuid(),
     'success',
     'REPORT_PREPARED',
-    'Valuation Report Ready - PROJ-2023-003',
+    'Valuation Report Ready - VAL-2026-003',
     'The valuation report for 89 Duplication Rd is complete and ready for your review.',
     'client-001',
     'bank_credit_officer',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-003'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-003'),
     false,
     NOW() - INTERVAL '1 day'
   ),
@@ -258,11 +330,11 @@ VALUES
     gen_random_uuid(),
     'info',
     'STAGE_CHANGED',
-    'Project Update - PROJ-2023-005',
+    'Project Update - VAL-2026-005',
     'Your valuation project has moved to the "Report Prepared" stage.',
     'client-001',
     'bank_credit_officer',
-    (SELECT id FROM projects WHERE project_id = 'PROJ-2023-005'),
+    (SELECT id FROM projects WHERE project_id = 'VAL-2026-005'),
     true,
     NOW() - INTERVAL '2 days'
   );
@@ -341,3 +413,4 @@ SELECT COUNT(*) AS document_count FROM documents;
 SELECT COUNT(*) AS team_member_count FROM team_members;
 SELECT COUNT(*) AS notification_count FROM notifications;
 SELECT COUNT(*) AS account_settings_count FROM account_settings;
+>>>>>>> origin/dev
