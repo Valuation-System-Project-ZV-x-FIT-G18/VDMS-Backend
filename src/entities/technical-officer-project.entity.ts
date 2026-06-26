@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+// Allowed workflow statuses for Technical Officer projects.
 export enum TechnicalOfficerProjectStatus {
   ASSIGNED = 'Assigned',
   IN_PROGRESS = 'In Progress',
@@ -18,6 +19,7 @@ export enum TechnicalOfficerProjectStatus {
   OVERDUE = 'Overdue',
 }
 
+// Maps this class to the technical_officer_projects database table.
 @Entity('technical_officer_projects')
 export class TechnicalOfficerProject {
   @PrimaryGeneratedColumn('uuid')

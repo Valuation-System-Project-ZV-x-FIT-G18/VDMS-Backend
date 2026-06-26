@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { TechnicalOfficerProject } from './technical-officer-project.entity';
 
+// Maps this class to the technical_officer_reports database table.
 @Entity('technical_officer_reports')
 export class TechnicalOfficerReport {
   @PrimaryGeneratedColumn('uuid')
@@ -17,6 +18,7 @@ export class TechnicalOfficerReport {
   @Column({ name: 'project_id', type: 'uuid' })
   projectId!: string;
 
+  // Many reports can belong to one Technical Officer project.
   @ManyToOne(() => TechnicalOfficerProject, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'project_id' })
   project!: TechnicalOfficerProject;

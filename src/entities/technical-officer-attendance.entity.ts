@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+// Allowed attendance statuses shown in the frontend.
 export enum TechnicalOfficerAttendanceStatus {
   NOT_CHECKED_IN = 'Not Checked In',
   CHECKED_IN = 'Checked In',
@@ -14,6 +15,7 @@ export enum TechnicalOfficerAttendanceStatus {
   MISSED = 'Missed',
 }
 
+// Maps this class to the technical_officer_attendance database table.
 @Entity('technical_officer_attendance')
 export class TechnicalOfficerAttendance {
   @PrimaryGeneratedColumn('uuid')

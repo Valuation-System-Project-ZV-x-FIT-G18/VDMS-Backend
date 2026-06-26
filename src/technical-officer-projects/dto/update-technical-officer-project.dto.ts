@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { TechnicalOfficerProjectStatus } from '../../entities/technical-officer-project.entity';
 
+// Validates request body when updating a project; all fields are optional.
 export class UpdateTechnicalOfficerProjectDto {
   @IsOptional()
   @IsString()

@@ -5,6 +5,7 @@ import { TechnicalOfficerReport } from '../entities/technical-officer-report.ent
 import { TechnicalOfficerReportsController } from './technical-officer-reports.controller';
 import { TechnicalOfficerReportsService } from './technical-officer-reports.service';
 
+// Registers report and project repositories because reports belong to projects.
 @Module({
   imports: [
     TypeOrmModule.forFeature([TechnicalOfficerReport, TechnicalOfficerProject]),
