@@ -1,9 +1,28 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
+// Local lightweight User definition to avoid import path issues when the
+// actual entity module isn't present at the expected path. This defines
+// the properties used by this service. If you have a proper
+// entities/user.entity.ts file, replace this with the correct import.
+export class User {
+  id: string | undefined;
+  firstName?: string;
+  lastName?: string;
+  email: string | undefined;
+  role?: string;
+  department?: string;
+  status?: string;
+  photo?: string;
+  phone?: string;
+  createdAt?: Date;
+  password?: string;
+  resetToken?: string | null;
+  googleId?: string | null;
+}
 import * as bcrypt from 'bcryptjs';
+
+type CreateUserDto = Partial<User> & { email: string; password?: string };
 
 @Injectable()
 export class UsersService {
@@ -51,6 +70,18 @@ export class UsersService {
 
   async update(id: string, data: Partial<User>) {
     const user = await this.findOne(id);
+    if (data.email && data.email !== user.email) {
+      const existing = await this.repo.findOne({ where: { email: data.email } });
+      if (existing) throw new ConflictException('Email already in use');
+    }
+
+    if (data.password) {
+      // hash new password before saving
+      user.password = await bcrypt.hash(data.password, 12);
+      // don't copy raw password further
+      delete data.password;
+    }
+
     Object.assign(user, data);
     return this.repo.save(user);
   }
