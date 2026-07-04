@@ -226,6 +226,10 @@ export async function seedAllData(dataSource: DataSource) {
           requestedDate: new Date(projectData.requestedDate).toISOString(),
           expectedCompletion: new Date(projectData.expectedCompletion).toISOString(),
           paymentStatus: paymentStatusMap[projectData.paymentStatus] || PaymentStatus.PENDING,
+          // clientId is required (NOT NULL). No client/user is seeded in this portal,
+          // so all demo projects are owned by a single placeholder client. 'client-001'
+          // matches the example recipientId used by the notifications endpoint.
+          clientId: 'client-001',
         } as any);
         const savedProject: Project = await projectRepository.save(project) as unknown as Project;
         projects.push(savedProject);
@@ -234,10 +238,23 @@ export async function seedAllData(dataSource: DataSource) {
 
       // 3. SEED TEAM MEMBERS (assigned to first project)
       console.log('\n👥 Step 3: Seeding Team Members...');
-      for (const teamMemberData of mockTeamMembersData) {
+      for (let i = 0; i < mockTeamMembersData.length; i++) {
+        const teamMemberData = mockTeamMembersData[i] as {
+          name: string;
+          role: string;
+          email?: string;
+          phone?: string;
+        };
+        // email is required (NOT NULL); projectId is required and ties the member to a
+        // project. Distribute members round-robin across the seeded projects.
         const teamMember = teamMemberRepository.create({
           name: teamMemberData.name,
           role: teamRoleMap[teamMemberData.role] || TeamRole.TECHNICAL_OFFICER,
+          email:
+            teamMemberData.email ||
+            `${teamMemberData.name.toLowerCase().replace(/\s+/g, '.')}@vdms.com`,
+          phone: teamMemberData.phone ?? null,
+          projectId: projects[i % projects.length].id,
         } as any);
         await teamMemberRepository.save(teamMember);
         console.log(`✓ Created team member: ${teamMemberData.name} (${teamMemberData.role})`);
@@ -273,7 +290,9 @@ export async function seedAllData(dataSource: DataSource) {
       console.log('\n📝 Step 5: Seeding Reviews...');
       for (const reviewData of mockReviewsData) {
         const project = projects.find((p) => p.projectId === reviewData.projectId);
-        if (project && l3Manager) {
+        // mockReviewsData mixes in project-shaped rows that have no title/content;
+        // only seed entries that are actually reviews.
+        if (project && l3Manager && reviewData.title && reviewData.content) {
           const review = reviewRepository.create({
             projectId: project.id,
             managerId: l3Manager.id,

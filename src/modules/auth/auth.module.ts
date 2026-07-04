@@ -14,10 +14,18 @@ import { JwtStrategy } from './jwt.strategy';
     TypeOrmModule.forFeature([Manager]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET'),
-        signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') },
-      }),
+      useFactory: (config: ConfigService) => {
+        const secret = config.get<string>('JWT_SECRET');
+        if (!secret) {
+          throw new Error('JWT_SECRET is not configured. Refusing to start.');
+        }
+        return {
+          secret,
+          // expiresIn accepts the `ms` StringValue type; keep it untyped like the
+          // original so a plain string value (e.g. "24h") is accepted.
+          signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') ?? '1h' },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

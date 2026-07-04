@@ -10,7 +10,9 @@ import { seedAllData } from './seeds/seed-all';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
-  
+
+  const isProd = process.env.NODE_ENV === 'production';
+
   const allowedOrigins = new Set([
     'http://localhost:5173',
     'http://localhost:5174',
@@ -42,8 +44,11 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow any localhost port (development) and the configured origins
-      if (!origin || /^http:\/\/localhost:\d+$/.test(origin) || allowedOrigins.has(origin)) {
+      // In production only the explicit allowlist (FRONTEND_URL) is honoured.
+      // The permissive "any localhost port" rule is for local development only.
+      const allowAnyLocalhost =
+        !isProd && !!origin && /^http:\/\/localhost:\d+$/.test(origin);
+      if (!origin || allowAnyLocalhost || allowedOrigins.has(origin)) {
         callback(null, true);
         return;
       }
@@ -58,16 +63,21 @@ async function bootstrap() {
   console.log(`🚀 Backend running on http://localhost:${port}`);
   console.log(`📡 API at http://localhost:${port}/api`);
 
-  // Seed database with initial data
-  try {
-    const dataSource = app.get(DataSource);
-    if (dataSource && dataSource.isInitialized) {
-      console.log('🌱 Seeding database...');
-      await seedAllData(dataSource);
-      console.log('✅ Database seeding complete!');
+  // Seed database with initial data — development only. Never auto-seed in
+  // production: it writes demo records into a live database.
+  if (!isProd) {
+    try {
+      const dataSource = app.get(DataSource);
+      if (dataSource && dataSource.isInitialized) {
+        console.log('🌱 Seeding database...');
+        await seedAllData(dataSource);
+        console.log('✅ Database seeding complete!');
+      }
+    } catch (error) {
+      console.error('❌ Seeding failed:', error instanceof Error ? error.message : error);
     }
-  } catch (error) {
-    console.error('❌ Seeding failed:', error instanceof Error ? error.message : error);
+  } else {
+    console.log('⏭️  Skipping auto-seed (production).');
   }
 }
 void bootstrap();

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Project } from '../../entities/project.entity';
+import { Project, ProjectStatus, PaymentStatus } from '../../entities/project.entity';
 
 @Injectable()
 export class ProjectsService {
@@ -22,7 +22,7 @@ export class ProjectsService {
         { search: `%${search}%` },
       );
     }
-    return query.orderBy('project.created_at', 'DESC').getMany();
+    return query.orderBy('project.createdAt', 'DESC').getMany();
   }
 
   findOne(id: string) {
@@ -35,18 +35,21 @@ export class ProjectsService {
 
   findRecent() {
     return this.projectRepository.find({
-      order: { created_at: 'DESC' },
+      order: { createdAt: 'DESC' },
       take: 5,
     });
   }
 
   async getStats() {
     const total = await this.projectRepository.count();
-    const completed = await this.projectRepository.count({ where: { status: 'Completed' } });
-    const rejected = await this.projectRepository.count({ where: { status: 'Rejected' } });
-    const needsReview = await this.projectRepository.count({ where: { status: 'Needs Review' } });
-    const inProgress = await this.projectRepository.count({ where: { status: 'In Progress' } });
-    const paymentPending = await this.projectRepository.count({ where: { paymentStatus: 'Pending' } });
+    const completed = await this.projectRepository.count({ where: { status: ProjectStatus.COMPLETED } });
+    // NOTE: ProjectStatus has no 'Rejected' / 'Needs Review' states in this (managers-portal)
+    // model. These were carried over from a different status set during the dev merge.
+    // Left as 0 until the team decides whether those states belong on Project.
+    const rejected = 0;
+    const needsReview = 0;
+    const inProgress = await this.projectRepository.count({ where: { status: ProjectStatus.IN_PROGRESS } });
+    const paymentPending = await this.projectRepository.count({ where: { paymentStatus: PaymentStatus.PENDING } });
 
     return {
       totalProjects: total,

@@ -9,7 +9,11 @@ import { Project, ProjectStatus, PaymentStatus } from './src/entities/project.en
 import { Document, DocumentStatus } from './src/entities/document.entity';
 import { TeamMember, TeamRole } from './src/entities/team-member.entity';
 import { Invoice, InvoiceStatus } from './src/entities/invoice.entity';
-import { Notification } from './src/entities/notification.entity';
+import {
+  Notification,
+  NotificationType,
+  NotificationEvent,
+} from './src/entities/notification.entity';
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -397,33 +401,45 @@ async function seedComplete() {
     console.log('🔔 Seeding notifications...');
     const notifications = [
       {
-        managerId: l3Manager?.id,
-        type: 'WARNING',
+        recipientId: l3Manager?.id,
+        recipientRole: 'l3-manager',
+        type: NotificationType.WARNING,
+        event: NotificationEvent.STAGE_CHANGED,
+        title: 'New approval required',
         message: 'New approval required',
         isRead: false,
       },
       {
-        managerId: l3Manager?.id,
-        type: 'INFO',
+        recipientId: l3Manager?.id,
+        recipientRole: 'l3-manager',
+        type: NotificationType.INFO,
+        event: NotificationEvent.DOCUMENT_MISSING,
+        title: 'New document received',
         message: 'New document received for PRJ-2026-0006',
         isRead: false,
       },
       {
-        managerId: l2Manager?.id,
-        type: 'SUCCESS',
+        recipientId: l2Manager?.id,
+        recipientRole: 'l2-manager',
+        type: NotificationType.SUCCESS,
+        event: NotificationEvent.REPORT_PREPARED,
+        title: 'Review ready for approval',
         message: 'PRJ-2026-0004 review is ready for approval',
         isRead: false,
       },
       {
-        managerId: l1Manager?.id,
-        type: 'INFO',
+        recipientId: l1Manager?.id,
+        recipientRole: 'l1-manager',
+        type: NotificationType.INFO,
+        event: NotificationEvent.PAYMENT_DUE,
+        title: 'Payment verified',
         message: 'PRJ-2026-0001 payment has been verified',
         isRead: true,
       },
     ];
 
     for (const notif of notifications) {
-      if (notif.managerId) {
+      if (notif.recipientId) {
         const newNotification = AppDataSource.getRepository(Notification).create(notif);
         await AppDataSource.getRepository(Notification).save(newNotification);
       }

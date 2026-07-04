@@ -14,6 +14,10 @@ export class TeamMembersService {
     return this.teamMemberRepository.find();
   }
 
+  findByProject(projectId: string) {
+    return this.teamMemberRepository.find({ where: { projectId } });
+  }
+
   create(data: Partial<TeamMember>) {
     const member = this.teamMemberRepository.create(data);
     return this.teamMemberRepository.save(member);

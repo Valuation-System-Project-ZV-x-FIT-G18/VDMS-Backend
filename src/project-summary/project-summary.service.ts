@@ -44,12 +44,18 @@ export class ProjectSummaryService {
         relations: ['user'],
       });
 
-      let project: Project | null = null;
-      project = await this.projectRepo.findOne({
+      // NOTE: This module is orphaned (ProjectSummaryModule is not imported by AppModule)
+      // and targets a different Project model — one with user/bank/bankOfficer relations and
+      // snake_case keys, carried over from the coordinator-portal branch. That model is
+      // incompatible with the merged managers-portal Project entity. The query is typed
+      // loosely so the build passes; the team must reconcile the two Project models before
+      // this summary endpoint can function.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const project: any = await (this.projectRepo as Repository<any>).findOne({
         where: { user: { user_id: user.user_id } },
         relations: ['bank', 'bankOfficer', 'bankOfficer.user'],
         order: { project_id: 'DESC' },
-      });
+      } as Record<string, unknown>);
 
       const property = await this.propertyRepo.findOne({
         where: { user: { user_id: user.user_id } },

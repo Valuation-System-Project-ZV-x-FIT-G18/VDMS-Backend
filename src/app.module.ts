@@ -1,4 +1,5 @@
-﻿import { Module } from '@nestjs/common';
+﻿import { join } from 'path';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -19,6 +20,8 @@ import { DraftReportsModule } from './modules/draft-reports/draft-reports.module
 import { TeamMembersModule } from './modules/team-members/team-members.module';
 import { BottlenecksModule } from './modules/bottlenecks/bottlenecks.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { DatasheetsModule } from './modules/datasheets/datasheets.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -30,9 +33,12 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [Project, Document, TeamMember, Invoice, Notification],
-      synchronize: true,
-      logging: true,
+      entities: [join(__dirname, '**', '*.entity{.ts,.js}')],
+      // NEVER auto-sync the schema in production: TypeORM `synchronize` can silently
+      // alter/drop columns and destroy data. Use migrations in production. Dev keeps
+      // autosync for convenience. Same for query logging (noisy + leaks data in prod logs).
+      synchronize: process.env.NODE_ENV !== 'production',
+      logging: process.env.NODE_ENV !== 'production',
     }),
     AuthModule,
     ManagersModule,
@@ -42,6 +48,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     TeamMembersModule,
     BottlenecksModule,
     NotificationsModule,
+    StorageModule,
+    DatasheetsModule,
   ],
 })
 export class AppModule {}
