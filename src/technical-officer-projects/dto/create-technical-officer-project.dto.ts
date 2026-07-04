@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { TechnicalOfficerProjectStatus } from '../../entities/technical-officer-project.entity';
 
+// Validates request body when creating an assigned Technical Officer project.
 export class CreateTechnicalOfficerProjectDto {
   @IsString()
   @IsNotEmpty()

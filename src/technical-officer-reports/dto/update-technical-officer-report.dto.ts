@@ -1,5 +1,6 @@
 import { IsOptional, IsString, IsUUID } from 'class-validator';
 
+// Validates request body when updating a report; all fields are optional.
 export class UpdateTechnicalOfficerReportDto {
   @IsOptional()
   @IsUUID()

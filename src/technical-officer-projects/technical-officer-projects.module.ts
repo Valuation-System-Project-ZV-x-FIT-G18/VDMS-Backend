@@ -4,6 +4,7 @@ import { TechnicalOfficerProject } from '../entities/technical-officer-project.e
 import { TechnicalOfficerProjectsController } from './technical-officer-projects.controller';
 import { TechnicalOfficerProjectsService } from './technical-officer-projects.service';
 
+// Registers the project entity, controller, and service for this feature.
 @Module({
   imports: [TypeOrmModule.forFeature([TechnicalOfficerProject])],
   controllers: [TechnicalOfficerProjectsController],

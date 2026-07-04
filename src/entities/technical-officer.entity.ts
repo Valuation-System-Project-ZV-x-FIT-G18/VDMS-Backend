@@ -1,5 +1,6 @@
 import { Entity, PrimaryColumn, Column } from 'typeorm'; // TypeORM decorators for table mapping
 
+// Maps this class to the technical_officers database table.
 @Entity('technical_officers') // maps to "technical_officers" table in DB
 export class TechnicalOfficer {
   @PrimaryColumn({ length: 6 }) // e.g. tof001 — unique officer ID
