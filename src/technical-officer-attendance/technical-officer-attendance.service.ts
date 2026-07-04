@@ -13,6 +13,7 @@ import {
 import { CheckInAttendanceDto } from './dto/check-in-attendance.dto';
 import { CheckOutAttendanceDto } from './dto/check-out-attendance.dto';
 
+// Contains attendance workflow logic and database access through TypeORM.
 @Injectable()
 export class TechnicalOfficerAttendanceService {
   constructor(
@@ -20,6 +21,7 @@ export class TechnicalOfficerAttendanceService {
     private readonly attendanceRepository: Repository<TechnicalOfficerAttendance>,
   ) {}
 
+  // Creates today's check-in record and prevents duplicate check-ins.
   async checkIn(checkInDto: CheckInAttendanceDto) {
     const officerName = this.normalizeOfficerName(checkInDto.officerName);
     const now = new Date();
@@ -49,6 +51,7 @@ export class TechnicalOfficerAttendanceService {
     return this.attendanceRepository.save(attendance);
   }
 
+  // Adds checkout time, calculates total hours, and prevents invalid checkout actions.
   async checkOut(checkOutDto: CheckOutAttendanceDto) {
     const officerName = this.normalizeOfficerName(checkOutDto.officerName);
     const now = new Date();
@@ -81,6 +84,7 @@ export class TechnicalOfficerAttendanceService {
     return this.attendanceRepository.save(attendance);
   }
 
+  // Returns full attendance history with calculated missed statuses.
   async findAll() {
     const attendanceRecords = await this.attendanceRepository.find({
       order: { attendanceDate: 'DESC', createdAt: 'DESC' },
@@ -91,6 +95,7 @@ export class TechnicalOfficerAttendanceService {
     );
   }
 
+  // Returns today's attendance for one officer, or all records for today if no officer is given.
   async findToday(officerName?: string) {
     const today = this.getLocalDateString(new Date());
 
@@ -119,12 +124,14 @@ export class TechnicalOfficerAttendanceService {
     });
   }
 
+  // Finds one officer's attendance for a specific date.
   private findByOfficerAndDate(officerName: string, attendanceDate: string) {
     return this.attendanceRepository.findOne({
       where: { officerName, attendanceDate },
     });
   }
 
+  // Trims and validates officer name before using it in queries.
   private normalizeOfficerName(officerName: string) {
     const normalizedOfficerName = officerName.trim();
 
@@ -135,11 +142,13 @@ export class TechnicalOfficerAttendanceService {
     return normalizedOfficerName;
   }
 
+  // Converts check-in/check-out time difference into decimal hours.
   private calculateTotalHours(checkInTime: Date, checkOutTime: Date) {
     const totalMilliseconds = checkOutTime.getTime() - checkInTime.getTime();
     return Number((totalMilliseconds / (1000 * 60 * 60)).toFixed(2));
   }
 
+  // Late rule: after 9:15 AM is marked as Late.
   private isLateCheckIn(checkInTime: Date) {
     const lateThreshold = new Date(checkInTime);
     lateThreshold.setHours(9, 15, 0, 0);
@@ -147,6 +156,7 @@ export class TechnicalOfficerAttendanceService {
     return checkInTime > lateThreshold;
   }
 
+  // Builds a local yyyy-mm-dd string for date comparisons and storage.
   private getLocalDateString(date: Date) {
     const year = date.getFullYear();
     const month = `${date.getMonth() + 1}`.padStart(2, '0');
@@ -155,6 +165,7 @@ export class TechnicalOfficerAttendanceService {
     return `${year}-${month}-${day}`;
   }
 
+  // Marks old working days without check-in as Missed in the response.
   private withCalculatedStatus(attendance: TechnicalOfficerAttendance) {
     if (
       !attendance.checkInTime &&
@@ -169,6 +180,7 @@ export class TechnicalOfficerAttendanceService {
     return attendance;
   }
 
+  // Weekends are not treated as missed working days.
   private isPastWorkingDay(attendanceDate: string) {
     const today = this.getLocalDateString(new Date());
 

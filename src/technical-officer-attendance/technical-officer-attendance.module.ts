@@ -4,6 +4,7 @@ import { TechnicalOfficerAttendance } from '../entities/technical-officer-attend
 import { TechnicalOfficerAttendanceController } from './technical-officer-attendance.controller';
 import { TechnicalOfficerAttendanceService } from './technical-officer-attendance.service';
 
+// Registers the attendance entity, controller, and service for this feature.
 @Module({
   imports: [TypeOrmModule.forFeature([TechnicalOfficerAttendance])],
   controllers: [TechnicalOfficerAttendanceController],
